@@ -1,9 +1,13 @@
 <?php require "../_helpers/index.php";
 echo siteHeader("Gerenciar Pessoas");
 require("../_config/connection.php");
+require("../dao/Pessoas.php");
+require("../dao/Telefones.php");
 
 $message = false;
-$telephone_id = false;
+$telephone_id = null;
+$pessoas = new Pessoas();
+$telefones = new Telefones();
 
 if ($_GET) {
 	if (isset($_GET["message"])) {
@@ -13,28 +17,6 @@ if ($_GET) {
 		$telephone_id = $_GET["telephone_id"];
 	}
 }
-
-$query = "SELECT * FROM tbl_pessoas ";
-
-if ($telephone_id) {
-	$query .= "INNER JOIN tbl_telefones 
-	ON tbl_telefones.t_id_pessoa = tbl_pessoas.p_id WHERE tbl_telefones.t_id = $telephone_id";
-}
-
-$result = $conn->query($query);
-
-$rows = $result->fetch_all(MYSQLI_ASSOC); 
-$result->close();
-
-try {
-	$telephoneQuery = "SELECT * from tbl_telefones";
-	$telephoneResult = $conn->query($telephoneQuery);
-} catch (Exception $e) {
-	header('Location: index.php?message=Erro ao recuperar categorias!');
-	die();
-}
-
-$conn->close();
 ?>
 <section class="container mt-5 mb-5">
 
@@ -59,13 +41,12 @@ $conn->close();
 			<select class="form-select" id="telephone_id" name="telephone_id">
 				<option value>--filtre por telefone --</option>
 
-				<?php while ($telephone = $telephoneResult->fetch_assoc()) : ?>
-					<option value="<?= $telephone["t_id"] ?>" <?= $telephone["t_id"] == $telephone_id ? 'selected' : ''; ?>>
-						<?= "(".$telephone["t_ddd"].") " . $telephone["t_numero"] ?>
+				<?php foreach ($telefones->getAll() AS $telephone) : ?>
+					<option value="<?= $telephone->t_id ?>" <?= $telephone->t_id == $telephone_id ? 'selected' : ''; ?>>
+						<?= "(".$telephone->t_ddd.") " . $telephone->t_numero ?>
 					</option>
-				<?php endwhile; ?>
+				<?php endforeach; ?>
 
-				<?php $telephoneResult->close(); ?>
 			</select>
 			<button class="btn btn-outline-secondary" type="submit">
 				Pesquisar
@@ -89,27 +70,27 @@ $conn->close();
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ($rows as $product) : ?>
+			<?php foreach ($pessoas->getAll($telephone_id) AS $product) : ?>
 				<tr>
 					<td>
-						<?= "#".$product["p_id"] ?>
+						<?= "#".$product->p_id ?>
 					</td>
 					<td>
-						<?= $product["p_nome"] ?>
+						<?= $product->p_nome ?>
 					</td>
 					<td>
-						<?= $product["p_endereco"] ?>
+						<?= $product->p_endereco ?>
 					</td>
 					
 					<td>
 						<div class="btn-group" role="group">
-							<button type="button" class="btn btn-outline-primary" onclick="confirmDelete(<?= $product['p_id'] ?>)">
+							<button type="button" class="btn btn-outline-primary" onclick="confirmDelete(<?= $product->p_id ?>)">
 								Excluir
 							</button>
-							<a href="edit.php?id=<?= $product["p_id"] ?>" class="btn btn-outline-primary">
+							<a href="edit.php?id=<?= $product->p_id ?>" class="btn btn-outline-primary">
 								Editar
 							</a>
-							<a href="view.php?id=<?= $product["p_id"] ?>" class="btn btn-outline-primary">
+							<a href="view.php?id=<?= $product->p_id ?>" class="btn btn-outline-primary">
 								Ver
 							</a>
 						</div>

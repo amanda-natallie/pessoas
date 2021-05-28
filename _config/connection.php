@@ -1,14 +1,22 @@
 <?php
 
-$host = "localhost";
-$user = "root";
-$pwd = "";
-$db = "pessoas";
+define('DB_NAME', 'pessoas');
+define('DB_USER', 'root');
+define('DB_PASSWORD', '');
+define('DB_HOST', 'localhost');
 
-$conn = new mysqli($host, $user, $pwd, $db);
-
-$error = mysqli_connect_errno();
-if($error){
-    echo "Erro ao tentat se conectar com o banco de dados $error";
-    exit();
+class Connection {
+  private $connection;
+  private $host = DB_HOST;
+  private $user = DB_USER;
+  private $pass = DB_PASSWORD;
+  private $db = DB_NAME;
+ 
+  public function __construct() {
+    $this->connection = new mysqli($this->host, $this->user, $this->pass, $this->db);
+  }
+ 
+  public function query($sql) {
+    return $this->connection->query($sql);
+  }
 }

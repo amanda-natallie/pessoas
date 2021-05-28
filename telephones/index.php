@@ -5,12 +5,8 @@ $message = false;
 if ($_GET && $_GET["message"]) {
 	$message = $_GET["message"];
 }
-
-$query = "SELECT * FROM tbl_telefones inner join tbl_pessoas on tbl_pessoas.p_id = tbl_telefones.t_id_pessoa";
-$result = $conn->query($query);
-$rows = $result->fetch_all(MYSQLI_ASSOC);
-$result->close();
-$conn->close();
+require("../dao/Telefones.php");
+$telefones = new Telefones();
 ?>
 <section class="container mt-5 mb-5">
 
@@ -42,35 +38,35 @@ $conn->close();
 			</tr>
 		</thead>
 		<tbody>
-			<?php foreach ($rows as $telephone) : ?>
+			<?php foreach ($telefones->getAll(true) AS $telephone) : ?>
 				<tr>
 					<td>
-						<?= "#".$telephone["t_id"] ?>
+						<?= "#".$telephone->t_id?>
 					</td>
 
 					<td>
-						<?= $telephone["p_nome"] ?>
+						<?= $telephone->p_nome ?>
 					</td>
 					
 					<td>
-						<?= $telephone["t_ddd"] ?>
+						<?= $telephone->t_ddd ?>
 					</td>
 					
 					<td>
-						<?= $telephone["t_numero"] ?>
+						<?= $telephone->t_numero ?>
 					</td>
 					<td>
-						<?= $telephone["t_tipo"] == 1 ? "Fixo" : "Celular" ?>
+						<?= $telephone->t_tipo == 1 ? "Fixo" : "Celular" ?>
 					</td>
 					<td>
 						<div class="btn-group" role="group">
-							<button type="button" class="btn btn-outline-primary" onclick="confirmDelete(<?= $telephone['t_id'] ?>)">
+							<button type="button" class="btn btn-outline-primary" onclick="confirmDelete(<?= $telephone->t_id ?>)">
 								Excluir
 							</button>
-							<a href="edit.php?id=<?= $telephone["t_id"] ?>" class="btn btn-outline-primary">
+							<a href="edit.php?id=<?= $telephone->t_id ?>" class="btn btn-outline-primary">
 								Editar
 							</a>
-							<a href="view.php?id=<?= $telephone["t_id"] ?>" class="btn btn-outline-primary">
+							<a href="view.php?id=<?= $telephone->t_id ?>" class="btn btn-outline-primary">
 								Ver
 							</a>
 						</div>
