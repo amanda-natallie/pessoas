@@ -1,6 +1,10 @@
 <?php require "../_helpers/index.php";
 echo siteHeader("Adicionar Pessoa");
 require("../_config/connection.php");
+
+require("../dao/Pessoas.php");
+$pessoasDAO = new Pessoas();
+
 $result = false;
 $error = false;
 
@@ -10,18 +14,10 @@ if ($_POST) {
         $p_nome = $_POST["p_nome"];
         $p_endereco = $_POST["p_endereco"];
 
-        $query = "INSERT INTO tbl_pessoas (
-            p_nome, 
-            p_endereco 
-        ) VALUES (
-            '$p_nome',
-            '$p_endereco'
-        )";
-        echo $query;
-        $result = $conn->query($query);
-        $conn->close();
+        $params = [$p_nome, $p_endereco];
+        $rs = $pessoasDAO->insert($params);
 
-        if ($result) {
+        if ($rs) {
             header('Location: index.php?message=Pessoa inserida com sucesso!');
             die();
         }

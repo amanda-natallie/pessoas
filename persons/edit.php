@@ -1,6 +1,8 @@
 <?php require "../_helpers/index.php";
 echo siteHeader("Editar Pessoa");
 require("../_config/connection.php");
+require("../dao/Pessoas.php");
+$pessoasDAO = new Pessoas();
 
 $pessoa = false;
 $error = false;
@@ -12,43 +14,30 @@ if (!$_GET || !isset($_GET["id"])) {
 
 $pessoaId = $_GET["id"];
 
-try {
-    $query = "SELECT * FROM tbl_pessoas WHERE p_id=$pessoaId";
-    $result = $conn->query($query);
-    $pessoa = $result->fetch_assoc();
-    $result->close();
-} catch (Exception $e) {
-    $error = $e->getMessage();
-}
+$pessoa = $pessoasDAO->getById($pessoaId);
 
 if (!$pessoa || $error) {
     header('Location: index.php?message=Erro ao recuperar dados da pessoa!');
     die();
 }
 
-$upadeError = false;
-$updateResult = false;
+$updateError = false;
+$rs = false;
 if ($_POST) {
     try {
-
         $p_nome = $_POST["p_nome"];
         $p_endereco = $_POST["p_endereco"];
 
 
-        $query = "UPDATE tbl_pessoas SET 
-            p_nome='$p_nome', 
-            p_endereco='$p_endereco'
-        WHERE 
-            p_id=$pessoaId";
-
-        $updateResult = $conn->query($query);
-
-        if ($updateResult) {
-            header('Location: index.php?message=pessoa alterada com sucesso!');
+        $params = [$p_nome, $p_endereco];
+        $rs = $pessoasDAO->update($pessoaId, $params);
+        
+        if ($rs) {
+            header('Location: index.php?message=Pessoa atualizada com sucesso!');
             die();
         }
     } catch (Exception $e) {
-        $upadeError = $e->getMessage();
+        $updateError = $e->getMessage();
     }
 }
 
@@ -60,7 +49,7 @@ if ($_POST) {
 
     <section class="container mt-5 mb-5">
 
-        <?php if ($_POST && (!$updateResult || $upadeError)) : ?>
+        <?php if ($_POST && (!$rs || $upadeError)) : ?>
             <p>
                 Erro ao alterar o pessoa.
                 <?= $error ? $error : "Erro desconhecido." ?>
