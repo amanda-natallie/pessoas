@@ -2,6 +2,8 @@
 require("../_config/connection.php");
 require("../dao/Pessoas.php");
 $pessoasDAO = new Pessoas();
+require("../dao/Telefones.php");
+$telefonesDAO = new Telefones();
 $error = false;
 
 if (!$_GET || !$_GET["id"]) {
@@ -13,6 +15,7 @@ $pessoaId = $_GET["id"];
 
 try {
     $result = $pessoasDAO->delete($pessoaId);
+  
 } catch (Exception $e) {
     $error = $e->getMessage();
 }

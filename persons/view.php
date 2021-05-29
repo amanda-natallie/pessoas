@@ -1,7 +1,9 @@
 <?php require "../_helpers/index.php";
 echo siteHeader("Ver Pessoa");
 require("../_config/connection.php");
+require("../dao/Pessoas.php");
 
+$pessoasDAO = new Pessoas();
 $product = false;
 $error = false;
 
@@ -13,21 +15,16 @@ if (!$_GET || !isset($_GET["id"])) {
 $person_id = $_GET["id"];
 
 try {
-    $query = "SELECT * FROM tbl_pessoas WHERE p_id = $person_id";
-
-    $result = $conn->query($query);
-    $product = $result->fetch_assoc();
-    $result->close();
+    $product = $pessoasDAO->getById($person_id);
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
 
-if (!$product || $error) {
+ if (!$product || $error) {
     header('Location: index.php?message=Erro ao recuperar dados do produto!');
     die();
-}
+} 
 
-$conn->close();
 
 ?>
 

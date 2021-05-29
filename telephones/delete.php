@@ -1,6 +1,7 @@
 <?php  
 	require("../_config/connection.php");
-
+    require("../dao/Telefones.php");
+    $telefonesDAO = new Telefones();
     $error = false;
 
     if(!$_GET || !$_GET["id"]){
@@ -11,9 +12,7 @@
     $telephoneId = $_GET["id"];
 
     try {
-        $query = "DELETE FROM tbl_telefones WHERE t_id=$telephoneId";
-		$result = $conn->query($query);
-        $conn->close();
+        $result = $telefonesDAO->delete($telephoneId);
     } catch (Exception $e) {
         $error = $e->getMessage();
     }

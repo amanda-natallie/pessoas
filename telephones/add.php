@@ -1,6 +1,11 @@
 <?php require "../_helpers/index.php";
 echo siteHeader("Adicionar Telefone");
 require("../_config/connection.php");
+require("../dao/Telefones.php");
+require("../dao/Pessoas.php");
+
+$telefonesDAO = new Telefones();
+$pessoasDAO = new Pessoas();
 
 $result = false;
 $error = false;
@@ -11,32 +16,18 @@ if ($_POST) {
         $t_ddd = $_POST["t_ddd"];
         $t_tipo = $_POST["t_tipo"];
 
-        $query = "INSERT INTO tbl_telefones (
-            t_id_pessoa, 
-            t_numero,
-            t_ddd,
-            t_tipo
-        ) VALUES (
-            '$t_id_pessoa', 
-            '$t_numero',
-            '$t_ddd',
-            '$t_tipo'
-        )";
-
-        $result = $conn->query($query);
-        $conn->close();
-
-        if ($result) {
+        $params = [$t_id_pessoa, $t_numero, $t_ddd, $t_tipo];
+        $result = $telefonesDAO->insert($params);
+         if ($result) {
             header('Location: index.php?message=Telefone inserido com sucesso!');
             die();
-        }
+        } 
     } catch (Exception $e) {
         $error = $e->getMessage();
     }
 }
 try {
-    $personsQuery = "SELECT * from tbl_pessoas";
-    $personsResult = $conn->query($personsQuery);
+    $personsResult = $pessoasDAO->getAll();
 } catch (Exception $e) {
     header('Location: index.php?message=Erro ao recuperar pessoas!');
     die();
@@ -66,13 +57,12 @@ try {
                 <select class="form-select" id="t_id_pessoa" name="t_id_pessoa" required>
                     <option value="">-- Selecione um --</option>
 
-                    <?php while ($persons = $personsResult->fetch_assoc()) : ?>
-                        <option value="<?= $persons["p_id"] ?>">
-                            <?= $persons["p_nome"] ?>
+                    <?php foreach ($personsResult as $persons) : ?>
+                        <option value="<?= $persons->p_id ?>">
+                            <?= $persons->p_nome ?>
                         </option>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
 
-                    <?php $personsResult->close(); ?>
                 </select>
             </div>
         </div>

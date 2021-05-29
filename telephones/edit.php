@@ -2,6 +2,11 @@
 echo siteHeader("Editar Telefone");
 require("../_config/connection.php");
 
+require("../dao/Telefones.php");
+require("../dao/Pessoas.php");
+$telephoneDao = new Telefones();
+$pessoasDao = new Pessoas();
+
 $telephone = false;
 $error = false;
 
@@ -13,10 +18,7 @@ if (!$_GET || !isset($_GET["id"])) {
 $telephoneId = $_GET["id"];
 
 try {
-    $query = "SELECT * FROM tbl_telefones WHERE t_id=$telephoneId";
-    $result = $conn->query($query);
-    $telephone = $result->fetch_assoc();
-    $result->close();
+    $telephone = $telephoneDao->getById($telephoneId);
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
@@ -35,17 +37,9 @@ if ($_POST) {
         $t_ddd = $_POST["t_ddd"];
         $t_tipo = $_POST["t_tipo"];
 
-        $query = "UPDATE tbl_telefones SET 
-            t_id_pessoa='$t_id_pessoa', 
-            t_numero='$t_numero',
-            t_ddd='$t_ddd',
-            t_tipo='$t_tipo'
-        WHERE 
-            t_id=$telephoneId
-        ";
-
-        $updateResult = $conn->query($query);
-
+        $params = [$t_id_pessoa, $t_numero, $t_ddd, $t_tipo];
+        $updateResult = $telephoneDao->update($telephone["t_id"], $params);
+        
         if ($updateResult) {
             header('Location: index.php?message=Telefone alterado com sucesso!');
             die();
@@ -55,13 +49,11 @@ if ($_POST) {
     }
 }
 try {
-    $personsQuery = "SELECT * from tbl_pessoas";
-    $personsResult = $conn->query($personsQuery);
+    $personsResult = $pessoasDao->getAll();
 } catch (Exception $e) {
     header('Location: index.php?message=Erro ao recuperar pessoas!');
     die();
 }
-$conn->close();
 
 ?>
 
@@ -89,13 +81,11 @@ $conn->close();
                 <select class="form-select" id="t_id_pessoa" name="t_id_pessoa" required>
                     <option value="">-- Selecione um --</option>
 
-                    <?php while ($persons = $personsResult->fetch_assoc()) : ?>
-                        <option value="<?= $persons["p_id"] ?>" <?= $persons["p_id"] == $telephone["t_id_pessoa"] ? "selected" : "" ?>>
-                            <?= $persons["p_nome"] ?>
+                    <?php foreach ($personsResult as $persons) : ?>
+                        <option value="<?= $persons->p_id ?>" <?= $persons->p_id == $telephone["t_id_pessoa"] ? "selected" : "" ?>>
+                            <?= $persons->p_nome ?>
                         </option>
-                    <?php endwhile; ?>
-
-                    <?php $personsResult->close(); ?>
+                    <?php endforeach; ?>
                 </select>
             </div>
         </div>

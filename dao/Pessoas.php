@@ -38,6 +38,8 @@ class Pessoas extends Connection
   public function delete($id)
   {
     $sql = "DELETE FROM  " . $this->table . " WHERE p_id=" . $id;
+    $sql1 = "DELETE FROM tbl_telefones WHERE t_id_pessoa =" . $id;
+    parent::query($sql1);
     return parent::query($sql);
   }
 }

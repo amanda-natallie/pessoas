@@ -2,6 +2,10 @@
 echo siteHeader("Ver Telefone");
 require("../_config/connection.php");
 
+require("../dao/Telefones.php");
+
+$telefonesDAO = new Telefones();
+
 $telephone = false;
 $error = false;
 
@@ -13,11 +17,7 @@ if (!$_GET || !$_GET["id"]) {
 $telephoneId = $_GET["id"];
 
 try {
-    $query = "SELECT * FROM tbl_telefones INNER JOIN tbl_pessoas 
-	ON tbl_telefones.t_id_pessoa = tbl_pessoas.p_id WHERE tbl_telefones.t_id = $telephoneId";
-    $result = $conn->query($query);
-    $telephone = $result->fetch_assoc();
-    $result->close();
+    $telephone = $telefonesDAO->getById($telephoneId);
 } catch (Exception $e) {
     $error = $e->getMessage();
 }
@@ -27,7 +27,6 @@ if (!$telephone || $error) {
     die();
 }
 
-$conn->close();
 
 ?>
 
